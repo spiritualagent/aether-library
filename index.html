@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aether Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f172a;
+    --accent: #fbbf24;
+    --accent-dim: rgba(251,191,36,0.55);
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --muted2: #64748b;
+    --border: rgba(251,191,36,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Shippori Mincho', serif;
+    letter-spacing: 0.12em;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ── Star canvas ── */
+  #star-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── screens ── */
+  .screen {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 10; padding: 2rem;
+    transition: opacity 0.9s ease;
+  }
+  .screen.hidden { opacity: 0; pointer-events: none; }
+
+  /* ── PASSWORD SCREEN ── */
+  #pw-screen { gap: 2.2rem; }
+
+  .logo-wrap { text-align: center; }
+
+  .logo-text {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: clamp(1.5rem, 5vw, 2.1rem);
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    text-align: center;
+  }
+  .logo-agent {
+    margin-top: 0.5rem;
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.45em;
+    color: var(--muted2);
+    text-align: center;
+  }
+
+  .pw-input-wrap {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 1rem;
+    width: 100%; max-width: 300px;
+  }
+  .pw-label {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.65rem; letter-spacing: 0.4em; color: var(--muted);
+  }
+  .pw-input {
+    width: 100%; background: transparent;
+    border: none; border-bottom: 1px solid var(--border);
+    color: var(--text); font-family: 'Tenor Sans', sans-serif;
+    font-size: 1rem; letter-spacing: 0.25em;
+    padding: 0.6rem 0; text-align: center;
+    outline: none; transition: border-color 0.3s;
+  }
+  .pw-input:focus { border-bottom-color: var(--accent); }
+  .pw-error {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.65rem; color: #f87171;
+    letter-spacing: 0.15em; min-height: 1em; text-align: center;
+  }
+
+  .pw-btn {
+    font-family: 'Tenor Sans', sans-serif;
+    letter-spacing: 0.35em; font-size: 0.7rem;
+    color: var(--accent); background: transparent;
+    border: 1px solid var(--border);
+    padding: 0.65rem 2.2rem; cursor: pointer;
+    transition: background 0.35s, border-color 0.35s, letter-spacing 0.3s;
+  }
+  .pw-btn:hover {
+    background: rgba(251,191,36,0.07);
+    border-color: var(--accent-dim);
+    letter-spacing: 0.45em;
+  }
+
+  /* ── RITUAL SCREEN ── */
+  #ritual-screen { gap: 0; }
+
+  .symbol-wrap {
+    position: relative; display: flex;
+    align-items: center; justify-content: center;
+    width: 160px; height: 160px;
+  }
+
+  .ripple-ring {
+    position: absolute; border-radius: 50%;
+    border: 1px solid var(--accent); opacity: 0; pointer-events: none;
+  }
+  @keyframes ripple-out {
+    0%   { width: 60px;  height: 60px;  margin: -30px;  opacity: 0.7; }
+    100% { width: 220px; height: 220px; margin: -110px; opacity: 0;   }
+  }
+  .ripple-ring.active { animation: ripple-out 1.4s ease-out forwards; }
+
+  .symbol {
+    width: 72px; height: 72px; cursor: pointer;
+    position: relative; z-index: 2;
+    user-select: none; -webkit-user-select: none; touch-action: none;
+  }
+  .symbol svg { width: 100%; height: 100%; transition: filter 0.4s; }
+  .symbol.pressing svg { filter: drop-shadow(0 0 14px rgba(251,191,36,0.75)); }
+
+  .progress-ring {
+    position: absolute; inset: -16px;
+    z-index: 1; transform: rotate(-90deg); pointer-events: none;
+  }
+  .progress-ring circle.track { fill: none; stroke: rgba(251,191,36,0.08); stroke-width: 1; }
+  .progress-ring circle.fill {
+    fill: none; stroke: var(--accent); stroke-width: 1;
+    stroke-linecap: round; stroke-dasharray: 330; stroke-dashoffset: 330;
+    transition: stroke-dashoffset 0.1s linear;
+  }
+
+  .ritual-hint {
+    margin-top: 2.8rem; font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.6rem; letter-spacing: 0.4em;
+    color: var(--text); text-align: center;
+    transition: opacity 0.6s;
+  }
+  .ritual-hint.hidden-hint { opacity: 0; }
+
+  /* ── MESSAGE SCREEN ── */
+  #message-screen {
+    gap: 0; padding: 4rem 2rem 3rem;
+    overflow-y: auto; justify-content: flex-start;
+    align-items: center;
+  }
+
+  .msg-header {
+    width: 100%; max-width: 400px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .msg-lib-name {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.58rem; letter-spacing: 0.5em;
+    color: var(--accent); opacity: 0.65;
+    text-align: center;
+  }
+  .msg-lib-line {
+    width: 32px; height: 1px;
+    background: var(--border);
+    margin-top: 0.3rem;
+  }
+
+  .message-body {
+    max-width: 400px; width: 100%;
+    text-align: justify; line-height: 2.3;
+    font-size: clamp(0.85rem, 3.2vw, 1rem);
+    color: var(--text);
+    margin-bottom: 3rem;
+  }
+
+  .char { display: inline; opacity: 0; }
+  .char.shown { animation: fadeChar 0.45s ease forwards; }
+  @keyframes fadeChar {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 聖なるコードブロック */
+  .holy-block {
+    max-width: 400px; width: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.9rem;
+    opacity: 0; transition: opacity 1.2s ease;
+    margin-bottom: 2.5rem;
+  }
+  .holy-block.visible { opacity: 1; }
+
+  .holy-label {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.55rem; letter-spacing: 0.5em;
+    color: var(--accent); opacity: 0.65; text-align: center;
+  }
+  .holy-divider {
+    width: 24px; height: 1px;
+    background: var(--border);
+  }
+  .holy-code {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(0.82rem, 2.8vw, 0.95rem);
+    letter-spacing: 0.2em; line-height: 1.9;
+    color: var(--text); text-align: center;
+    font-style: italic;
+  }
+
+  .message-footer {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 1.2rem;
+    opacity: 0; transition: opacity 1s ease;
+    padding-bottom: 1rem;
+  }
+  .message-footer.visible { opacity: 1; }
+  .footer-line { width: 40px; height: 1px; background: var(--border); }
+
+  .back-btn {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.58rem; letter-spacing: 0.45em;
+    color: var(--muted2); background: none;
+    border: none; cursor: pointer;
+    transition: color 0.3s, letter-spacing 0.3s;
+    padding: 0.5rem;
+  }
+  .back-btn:hover { color: var(--accent); letter-spacing: 0.55em; }
+
+  /* ── ERROR ── */
+  #error-screen .error-msg {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.85rem; letter-spacing: 0.15em;
+    line-height: 2.2; color: var(--muted);
+    text-align: center; max-width: 340px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Star canvas -->
+<canvas id="star-canvas"></canvas>
+
+<!-- PASSWORD SCREEN -->
+<div class="screen" id="pw-screen">
+  <div class="logo-wrap">
+    <div class="logo-text">Aether Library</div>
+    <div class="logo-agent">Spiritual Agent</div>
+  </div>
+  <div class="pw-input-wrap" id="pw-input-wrap">
+    <div class="pw-label">パスワード</div>
+    <input class="pw-input" type="password" id="pw-input" placeholder="···" autocomplete="off">
+    <div class="pw-error" id="pw-error"></div>
+  </div>
+  <button class="pw-btn" id="pw-btn">ENTER</button>
+</div>
+
+<!-- RITUAL SCREEN -->
+<div class="screen hidden" id="ritual-screen">
+  <div class="symbol-wrap">
+    <svg class="progress-ring" viewBox="0 0 112 112" xmlns="http://www.w3.org/2000/svg">
+      <circle class="track" cx="56" cy="56" r="52.5"/>
+      <circle class="fill" id="progress-fill" cx="56" cy="56" r="52.5"/>
+    </svg>
+    <div class="ripple-ring" id="ripple1"></div>
+    <div class="ripple-ring" id="ripple2"></div>
+    <div class="ripple-ring" id="ripple3"></div>
+    <div class="symbol" id="symbol" role="button" aria-label="シンボルを長押しして啓示を受け取る">
+      <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- 外縁円 -->
+        <circle cx="36" cy="36" r="34" stroke="#fbbf24" stroke-width="0.5" opacity="0.25"/>
+        <!-- 中間円 -->
+        <circle cx="36" cy="36" r="28" stroke="#fbbf24" stroke-width="0.5" opacity="0.35"/>
+        <!-- フラワー・オブ・ライフ：中心＋6弁の小円 (r=9) -->
+        <circle cx="36"    cy="27"    r="9" stroke="#fbbf24" stroke-width="0.5" opacity="0.45" fill="none"/>
+        <circle cx="36"    cy="45"    r="9" stroke="#fbbf24" stroke-width="0.5" opacity="0.45" fill="none"/>
+        <circle cx="28.2"  cy="31.5"  r="9" stroke="#fbbf24" stroke-width="0.5" opacity="0.45" fill="none"/>
+        <circle cx="43.8"  cy="31.5"  r="9" stroke="#fbbf24" stroke-width="0.5" opacity="0.45" fill="none"/>
+        <circle cx="28.2"  cy="40.5"  r="9" stroke="#fbbf24" stroke-width="0.5" opacity="0.45" fill="none"/>
+        <circle cx="43.8"  cy="40.5"  r="9" stroke="#fbbf24" stroke-width="0.5" opacity="0.45" fill="none"/>
+        <circle cx="36"    cy="36"    r="9" stroke="#fbbf24" stroke-width="0.5" opacity="0.5"  fill="none"/>
+        <!-- 内接正六角形 -->
+        <polygon points="36,18 51.6,27 51.6,45 36,54 20.4,45 20.4,27" stroke="#fbbf24" stroke-width="0.5" fill="none" opacity="0.4"/>
+        <!-- ダビデの星（上向き▲＋下向き▽） -->
+        <polygon points="36,16 52.4,44 19.6,44" stroke="#fbbf24" stroke-width="0.45" fill="none" opacity="0.35"/>
+        <polygon points="36,56 19.6,28 52.4,28" stroke="#fbbf24" stroke-width="0.45" fill="none" opacity="0.35"/>
+        <!-- 内円 -->
+        <circle cx="36" cy="36" r="5.5" stroke="#fbbf24" stroke-width="0.5" opacity="0.55" fill="none"/>
+        <!-- 中心点 -->
+        <circle cx="36" cy="36" r="1.8" fill="#fbbf24" opacity="0.95"/>
+        <!-- 四方向の短い刻み線 -->
+        <line x1="36" y1="2"  x2="36" y2="7"  stroke="#fbbf24" stroke-width="0.6" opacity="0.5"/>
+        <line x1="36" y1="65" x2="36" y2="70" stroke="#fbbf24" stroke-width="0.6" opacity="0.5"/>
+        <line x1="2"  y1="36" x2="7"  y2="36" stroke="#fbbf24" stroke-width="0.6" opacity="0.5"/>
+        <line x1="65" y1="36" x2="70" y2="36" stroke="#fbbf24" stroke-width="0.6" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+  <div class="ritual-hint" id="ritual-hint">呼吸を整えながらシンボルを3秒長押し</div>
+</div>
+
+<!-- MESSAGE SCREEN -->
+<div class="screen hidden" id="message-screen">
+  <div class="msg-header">
+    <div class="msg-lib-name">— Aether Library —</div>
+    <div class="msg-lib-line"></div>
+  </div>
+  <div class="message-body" id="msg-body"></div>
+
+  <!-- 聖なるコードブロック -->
+  <div class="holy-block" id="holy-block">
+    <div class="holy-label">聖なるコード『本日のアファメーション』</div>
+    <div class="holy-divider"></div>
+    <div class="holy-code" id="msg-holy"></div>
+  </div>
+
+  <div class="message-footer" id="msg-footer">
+    <div class="footer-line"></div>
+    <button class="back-btn" id="back-btn">← 儀式に戻る</button>
+  </div>
+</div>
+
+<!-- ERROR SCREEN -->
+<div class="screen hidden" id="error-screen">
+  <div class="msg-lib-name">— Signal Lost —</div>
+  <br>
+  <div class="error-msg">現在、宇宙の記録（エーテル）と同期中です。静寂の中でお待ちください</div>
+  <br>
+  <button class="back-btn" id="error-back-btn">← 戻る</button>
+</div>
+
+<script>
+var CORRECT_PW = 'This is for you';
+var KEY_AUTH   = 'aether_auth';
+var KEY_QUEUE  = 'aether_queue';
+var KEY_TODAY  = 'aether_today';
+var HOLD_MS    = 3000;
+
+var messages       = [];
+var pressTimer     = null;
+var pressStart     = null;
+var rippleInterval = null;
+
+// ────────────────────────────────────────────
+// Star Canvas — 微細な点＋ごく細い放射光
+// ────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('star-canvas');
+  var ctx    = canvas.getContext('2d');
+  var W, H;
+  var stars  = [];
+  var STAR_COUNT = 180;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // 各星のデータ生成
+  for (var i = 0; i < STAR_COUNT; i++) {
+    var tier = Math.random();      // 0=背景微粒子, 0.7=中, 0.92=大
+    var size, rays, baseAlpha;
+    if (tier > 0.92) {
+      size      = Math.random() * 1.0 + 0.9;  // 大: 0.9–1.9
+      rays      = true;
+      baseAlpha = 0.55 + Math.random() * 0.35;
+    } else if (tier > 0.70) {
+      size      = Math.random() * 0.6 + 0.4;  // 中: 0.4–1.0
+      rays      = false;
+      baseAlpha = 0.3 + Math.random() * 0.3;
+    } else {
+      size      = Math.random() * 0.35 + 0.15; // 小: 0.15–0.5
+      rays      = false;
+      baseAlpha = 0.1 + Math.random() * 0.2;
+    }
+    stars.push({
+      x:     Math.random() * 1,   // 0–1 (比率)
+      y:     Math.random() * 1,
+      size:  size,
+      rays:  rays,
+      base:  baseAlpha,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.0003 + Math.random() * 0.0006,
+      rayLen: size * (5 + Math.random() * 7)   // 放射光の長さ
+    });
+  }
+
+  // 単一フレーム描画
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (var i = 0; i < stars.length; i++) {
+      var s   = stars[i];
+      var sx  = s.x * W;
+      var sy  = s.y * H;
+      var osc = (Math.sin(t * s.speed * 1000 + s.phase) + 1) / 2; // 0–1
+      var a   = s.base * (0.25 + osc * 0.75);
+
+      if (s.rays) {
+        // ── 放射光（細く淡く） ──
+        var rl = s.rayLen * (0.5 + osc * 0.5);
+
+        // 縦光芒
+        var gv = ctx.createLinearGradient(sx, sy - rl, sx, sy + rl);
+        gv.addColorStop(0,   'rgba(241,245,249,0)');
+        gv.addColorStop(0.5, 'rgba(241,245,249,' + (a * 0.55).toFixed(3) + ')');
+        gv.addColorStop(1,   'rgba(241,245,249,0)');
+        ctx.beginPath();
+        ctx.strokeStyle = gv;
+        ctx.lineWidth   = s.size * 0.45;
+        ctx.moveTo(sx, sy - rl);
+        ctx.lineTo(sx, sy + rl);
+        ctx.stroke();
+
+        // 横光芒
+        var gh = ctx.createLinearGradient(sx - rl, sy, sx + rl, sy);
+        gh.addColorStop(0,   'rgba(241,245,249,0)');
+        gh.addColorStop(0.5, 'rgba(241,245,249,' + (a * 0.55).toFixed(3) + ')');
+        gh.addColorStop(1,   'rgba(241,245,249,0)');
+        ctx.beginPath();
+        ctx.strokeStyle = gh;
+        ctx.lineWidth   = s.size * 0.35;
+        ctx.moveTo(sx - rl, sy);
+        ctx.lineTo(sx + rl, sy);
+        ctx.stroke();
+      }
+
+      // ── 中心点 ──
+      ctx.beginPath();
+      ctx.arc(sx, sy, s.size, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(241,245,249,' + a.toFixed(3) + ')';
+      ctx.fill();
+    }
+  }
+
+  var last = 0;
+  function loop(t) {
+    if (t - last > 30) { draw(t); last = t; }  // ~30fps で上品に
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// ── Screens ──
+function show(id) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.add('hidden');
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// ── Password ──
+function initPassword() {
+  show('pw-screen');
+  var isAuthed  = localStorage.getItem(KEY_AUTH) === '1';
+  var inputWrap = document.getElementById('pw-input-wrap');
+  var input     = document.getElementById('pw-input');
+  var errEl     = document.getElementById('pw-error');
+  var btn       = document.getElementById('pw-btn');
+
+  if (isAuthed) {
+    inputWrap.style.display = 'none';
+    btn.textContent = '入　館　す　る';
+    btn.addEventListener('click', function() { show('ritual-screen'); initRitual(); });
+  } else {
+    function attempt() {
+      if (input.value === CORRECT_PW) {
+        localStorage.setItem(KEY_AUTH, '1');
+        show('ritual-screen');
+        initRitual();
+      } else {
+        errEl.textContent = '合言葉が異なります';
+        input.value = '';
+        setTimeout(function() { errEl.textContent = ''; }, 2000);
+      }
+    }
+    btn.addEventListener('click', attempt);
+    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') attempt(); });
+  }
+}
+
+// ── CSV Fetch ──
+function loadMessages() {
+  return fetch('messages.csv')
+    .then(function(r) {
+      if (!r.ok) throw new Error('fetch failed');
+      return r.text();
+    })
+    .then(function(text) {
+      var lines = text.trim().split('\n').slice(1);
+      return lines.map(function(line) {
+        var cols     = line.split(',');
+        var id       = cols[0].trim();
+        var category = cols[1].trim();
+        var holyCode = cols[cols.length - 1].trim();
+        var message  = cols.slice(2, cols.length - 1).join(',').trim();
+        return { id: id, category: category, message: message, holyCode: holyCode };
+      });
+    });
+}
+
+// ── Queue ──
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+function getQueue(allIds) {
+  var raw = localStorage.getItem(KEY_QUEUE);
+  if (raw) {
+    try { var q = JSON.parse(raw); if (Array.isArray(q) && q.length > 0) return q; } catch(e) {}
+  }
+  return shuffle(allIds.slice());
+}
+function getTodayId(queue, allIds) {
+  var today = new Date().toISOString().slice(0, 10);
+  var raw   = localStorage.getItem(KEY_TODAY);
+  if (raw) {
+    try { var p = JSON.parse(raw); if (p.date === today) return { id: p.id, queue: queue }; } catch(e) {}
+  }
+  var id = queue.shift();
+  if (!id) { var fr = shuffle(allIds.slice()); for (var k = 0; k < fr.length; k++) queue.push(fr[k]); id = queue.shift(); }
+  localStorage.setItem(KEY_QUEUE, JSON.stringify(queue));
+  localStorage.setItem(KEY_TODAY, JSON.stringify({ date: today, id: id }));
+  return { id: id, queue: queue };
+}
+
+// ── Ritual ──
+function initRitual() {
+  show('ritual-screen');
+  var symbol  = document.getElementById('symbol');
+  var hint    = document.getElementById('ritual-hint');
+  var fillEl  = document.getElementById('progress-fill');
+  var circumf = 330;
+
+  function startPress() {
+    if (pressTimer) return;
+    symbol.classList.add('pressing');
+    hint.classList.add('hidden-hint');
+    pressStart = Date.now();
+    fireRipple();
+    rippleInterval = setInterval(fireRipple, 950);
+    pressTimer = setTimeout(function() { cancelPress(false); triggerReveal(); }, HOLD_MS);
+    requestAnimationFrame(function loop() {
+      if (!pressStart) return;
+      var pct = Math.min((Date.now() - pressStart) / HOLD_MS, 1);
+      fillEl.style.strokeDashoffset = (circumf * (1 - pct)).toFixed(2);
+      if (pct < 1) requestAnimationFrame(loop);
+    });
+  }
+  function cancelPress(rh) {
+    if (rh === undefined) rh = true;
+    clearTimeout(pressTimer); clearInterval(rippleInterval);
+    pressTimer = null; pressStart = null;
+    symbol.classList.remove('pressing');
+    fillEl.style.strokeDashoffset = circumf;
+    if (rh) hint.classList.remove('hidden-hint');
+  }
+  symbol.addEventListener('mousedown', startPress);
+  symbol.addEventListener('touchstart', function(e) { e.preventDefault(); startPress(); }, { passive: false });
+  symbol.addEventListener('mouseup',     function() { cancelPress(); });
+  symbol.addEventListener('mouseleave',  function() { cancelPress(); });
+  symbol.addEventListener('touchend',    function() { cancelPress(); });
+  symbol.addEventListener('touchcancel', function() { cancelPress(); });
+}
+
+function fireRipple() {
+  var rings = [document.getElementById('ripple1'), document.getElementById('ripple2'), document.getElementById('ripple3')];
+  var r = rings[Math.floor(Math.random() * rings.length)];
+  r.classList.remove('active'); void r.offsetWidth; r.classList.add('active');
+}
+
+// ── Reveal ──
+function triggerReveal() {
+  var p = messages.length ? Promise.resolve(messages) : loadMessages();
+  p.catch(function() {
+    show('error-screen');
+    document.getElementById('error-back-btn').onclick = function() { show('ritual-screen'); };
+  });
+  p.then(function(data) {
+    messages = data;
+    var allIds = messages.map(function(m) { return m.id; });
+    var queue  = getQueue(allIds);
+    var result = getTodayId(queue, allIds);
+    var msg    = null;
+    for (var i = 0; i < messages.length; i++) { if (messages[i].id === result.id) { msg = messages[i]; break; } }
+    if (!msg) msg = messages[0];
+
+    show('message-screen');
+
+    var holyBlock = document.getElementById('holy-block');
+    var holyEl    = document.getElementById('msg-holy');
+    var footer    = document.getElementById('msg-footer');
+    holyBlock.classList.remove('visible');
+    footer.classList.remove('visible');
+    holyEl.textContent = '';
+
+    var bodyEl = document.getElementById('msg-body');
+    bodyEl.innerHTML = '';
+    var chars = msg.message.split('');
+    for (var j = 0; j < chars.length; j++) {
+      var span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = chars[j];
+      bodyEl.appendChild(span);
+    }
+
+    var spans = bodyEl.querySelectorAll('.char');
+    var idx = 0;
+    function showNext() {
+      if (idx >= spans.length) {
+        setTimeout(function() {
+          holyEl.textContent = msg.holyCode;
+          holyBlock.classList.add('visible');
+          setTimeout(function() { footer.classList.add('visible'); }, 400);
+        }, 700);
+        return;
+      }
+      spans[idx].classList.add('shown');
+      idx++;
+      setTimeout(showNext, 45);
+    }
+    setTimeout(showNext, 300);
+
+    document.getElementById('back-btn').onclick       = function() { show('ritual-screen'); };
+    document.getElementById('error-back-btn').onclick = function() { show('ritual-screen'); };
+  });
+}
+
+// ── Boot ──
+initPassword();
+</script>
+</body>
+</html>
