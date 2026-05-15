@@ -116,28 +116,35 @@
     position: relative; display: flex;
     align-items: center; justify-content: center;
     width: 160px; height: 160px;
+    flex-shrink: 0;
   }
 
   .ripple-ring {
-    position: absolute; border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    border-radius: 50%;
     border: 1px solid var(--accent); opacity: 0; pointer-events: none;
+    transform: translate(-50%, -50%);
   }
   @keyframes ripple-out {
-    0%   { width: 60px;  height: 60px;  margin: -30px;  opacity: 0.7; }
-    100% { width: 220px; height: 220px; margin: -110px; opacity: 0;   }
+    0%   { width: 60px;  height: 60px;  opacity: 0.7; }
+    100% { width: 220px; height: 220px; opacity: 0;   }
   }
   .ripple-ring.active { animation: ripple-out 1.4s ease-out forwards; }
 
   .symbol {
     width: 72px; height: 72px; cursor: pointer;
     position: relative; z-index: 2;
+    flex-shrink: 0;
     user-select: none; -webkit-user-select: none; touch-action: none;
   }
   .symbol svg { width: 100%; height: 100%; transition: filter 0.4s; }
   .symbol.pressing svg { filter: drop-shadow(0 0 14px rgba(251,191,36,0.75)); }
 
   .progress-ring {
-    position: absolute; inset: -16px;
+    position: absolute;
+    top: -16px; left: -16px;
+    width: 192px; height: 192px;
     z-index: 1; transform: rotate(-90deg); pointer-events: none;
   }
   .progress-ring circle.track { fill: none; stroke: rgba(251,191,36,0.08); stroke-width: 1; }
