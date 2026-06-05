@@ -248,6 +248,158 @@
   }
   .back-btn:hover { color: var(--accent); letter-spacing: 0.55em; }
 
+  /* ── ARCHIVE SCREEN ── */
+  #archive-screen {
+    gap: 0; padding: 4rem 2rem 3rem;
+    overflow-y: auto; justify-content: flex-start;
+    align-items: center;
+  }
+
+  .archive-header {
+    width: 100%; max-width: 440px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    flex-shrink: 0;
+  }
+  .archive-title {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.58rem; letter-spacing: 0.55em;
+    color: var(--accent); opacity: 0.7;
+    text-align: center;
+  }
+  .archive-subtitle {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.72rem; letter-spacing: 0.2em;
+    color: var(--muted); text-align: center;
+    margin-top: 0.4rem;
+  }
+  .archive-divider {
+    width: 32px; height: 1px;
+    background: var(--border); margin-top: 0.5rem;
+  }
+
+  .archive-list {
+    width: 100%; max-width: 440px;
+    display: flex; flex-direction: column;
+    gap: 0.1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .archive-item {
+    border: 1px solid var(--border);
+    padding: 1.1rem 1.4rem;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .archive-item::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(251,191,36,0.04) 0%, transparent 100%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .archive-item:hover { border-color: var(--accent-dim); }
+  .archive-item:hover::before { opacity: 1; }
+
+  .archive-item-date {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.55rem; letter-spacing: 0.4em;
+    color: var(--accent); opacity: 0.55;
+    margin-bottom: 0.4rem;
+  }
+  .archive-item-preview {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.82rem; letter-spacing: 0.12em;
+    color: var(--muted); line-height: 1.7;
+    white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .archive-item-category {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.5rem; letter-spacing: 0.3em;
+    color: var(--muted2); margin-top: 0.35rem;
+  }
+
+  .archive-empty {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.82rem; letter-spacing: 0.15em;
+    color: var(--muted2); text-align: center;
+    line-height: 2.2; padding: 2rem 0;
+  }
+
+  /* archive detail overlay */
+  .archive-detail {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,0.96);
+    z-index: 50;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 4rem 2rem 3rem;
+    overflow-y: auto;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .archive-detail.open { opacity: 1; pointer-events: all; }
+
+  .archive-detail-inner {
+    max-width: 400px; width: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0;
+  }
+  .archive-detail-date {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.55rem; letter-spacing: 0.5em;
+    color: var(--accent); opacity: 0.6;
+    text-align: center; margin-bottom: 1.8rem;
+  }
+  .archive-detail-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(0.85rem, 3.2vw, 1rem);
+    line-height: 2.3; letter-spacing: 0.12em;
+    color: var(--text); text-align: justify;
+    margin-bottom: 2.5rem;
+  }
+  .archive-detail-holy-label {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.55rem; letter-spacing: 0.5em;
+    color: var(--accent); opacity: 0.65;
+    text-align: center; margin-bottom: 0.6rem;
+  }
+  .archive-detail-divider {
+    width: 24px; height: 1px;
+    background: var(--border); margin-bottom: 0.9rem;
+  }
+  .archive-detail-holy {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(0.82rem, 2.8vw, 0.95rem);
+    letter-spacing: 0.2em; line-height: 1.9;
+    color: var(--text); text-align: center;
+    font-style: italic; margin-bottom: 2.5rem;
+  }
+  .archive-detail-close {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.58rem; letter-spacing: 0.45em;
+    color: var(--muted2); background: none;
+    border: none; cursor: pointer;
+    transition: color 0.3s, letter-spacing 0.3s;
+    padding: 0.5rem;
+  }
+  .archive-detail-close:hover { color: var(--accent); letter-spacing: 0.55em; }
+
+  /* archive btn on ritual/message screens */
+  .archive-link-btn {
+    font-family: 'Tenor Sans', sans-serif;
+    font-size: 0.52rem; letter-spacing: 0.45em;
+    color: var(--muted2); background: none;
+    border: none; cursor: pointer;
+    transition: color 0.3s;
+    padding: 0.4rem;
+    margin-top: 0.5rem;
+  }
+  .archive-link-btn:hover { color: var(--accent); }
+
   /* ── ERROR ── */
   #error-screen .error-msg {
     font-family: 'Shippori Mincho', serif;
@@ -318,6 +470,7 @@
     </div>
   </div>
   <div class="ritual-hint" id="ritual-hint">呼吸を整えながらシンボルを3秒長押し</div>
+  <button class="archive-link-btn" id="ritual-archive-btn">記録の間を開く</button>
 </div>
 
 <!-- MESSAGE SCREEN -->
@@ -338,10 +491,37 @@
   <div class="message-footer" id="msg-footer">
     <div class="footer-line"></div>
     <button class="back-btn" id="back-btn">← 儀式に戻る</button>
+    <button class="archive-link-btn" id="msg-archive-btn">記録の間を開く</button>
   </div>
 </div>
 
-<!-- ERROR SCREEN -->
+<!-- ARCHIVE SCREEN -->
+<div class="screen hidden" id="archive-screen">
+  <div class="archive-header">
+    <div class="archive-title">— 記　録　の　間 —</div>
+    <div class="archive-subtitle">過去に受け取った啓示の記録</div>
+    <div class="archive-divider"></div>
+  </div>
+  <div class="archive-list" id="archive-list"></div>
+  <div class="message-footer" id="archive-footer" style="opacity:1;">
+    <div class="footer-line"></div>
+    <button class="back-btn" id="archive-back-btn">← 儀式に戻る</button>
+  </div>
+</div>
+
+<!-- ARCHIVE DETAIL OVERLAY -->
+<div class="archive-detail" id="archive-detail">
+  <div class="archive-detail-inner">
+    <div class="archive-detail-date" id="detail-date"></div>
+    <div class="archive-detail-text" id="detail-text"></div>
+    <div class="archive-detail-holy-label">聖なるコード『アファメーション』</div>
+    <div class="archive-detail-divider"></div>
+    <div class="archive-detail-holy" id="detail-holy"></div>
+    <button class="archive-detail-close" id="detail-close">✕　閉じる</button>
+  </div>
+</div>
+
+
 <div class="screen hidden" id="error-screen">
   <div class="msg-lib-name">— Signal Lost —</div>
   <br>
@@ -552,7 +732,7 @@ function getTodayId(queue, allIds) {
 // ── Ritual ──
 function initRitual() {
   show('ritual-screen');
-  var symbol  = document.getElementById('symbol');
+  document.getElementById('ritual-archive-btn').onclick = function() { initArchive('ritual-screen'); };
   var hint    = document.getElementById('ritual-hint');
   var fillEl  = document.getElementById('progress-fill');
   var circumf = 330;
@@ -619,6 +799,9 @@ function triggerReveal() {
     footer.classList.remove('visible');
     holyEl.textContent = '';
 
+    // アーカイブに保存
+    saveToArchive(msg);
+
     var bodyEl = document.getElementById('msg-body');
     bodyEl.innerHTML = '';
     var chars = msg.message.split('');
@@ -646,9 +829,99 @@ function triggerReveal() {
     }
     setTimeout(showNext, 300);
 
-    document.getElementById('back-btn').onclick       = function() { show('ritual-screen'); };
+    document.getElementById('back-btn').onclick       = function() { show('ritual-screen'); initRitual(); };
     document.getElementById('error-back-btn').onclick = function() { show('ritual-screen'); };
+    document.getElementById('msg-archive-btn').onclick = function() { initArchive('message-screen'); };
   });
+}
+
+var KEY_ARCHIVE = 'aether_archive'; // [{date, id, message, holyCode, category}]
+
+// ── Archive helpers ──
+function getArchive() {
+  try { return JSON.parse(localStorage.getItem(KEY_ARCHIVE) || '[]'); } catch(e) { return []; }
+}
+function saveToArchive(msg) {
+  var today   = new Date().toISOString().slice(0, 10);
+  var archive = getArchive();
+  // 同じ日付のエントリが既にあれば追加しない
+  for (var i = 0; i < archive.length; i++) {
+    if (archive[i].date === today && archive[i].id === msg.id) return;
+  }
+  archive.unshift({ date: today, id: msg.id, message: msg.message, holyCode: msg.holyCode, category: msg.category });
+  localStorage.setItem(KEY_ARCHIVE, JSON.stringify(archive));
+}
+
+function formatDate(isoDate) {
+  var parts = isoDate.split('-');
+  return parts[0] + ' . ' + parts[1] + ' . ' + parts[2];
+}
+
+// ── Archive Screen ──
+function initArchive(fromScreen) {
+  var archive  = getArchive();
+  var listEl   = document.getElementById('archive-list');
+  listEl.innerHTML = '';
+
+  if (archive.length === 0) {
+    var empty = document.createElement('div');
+    empty.className = 'archive-empty';
+    empty.textContent = 'まだ啓示を受け取っていません\n\nシンボルに触れ、最初の記録を刻んでください';
+    listEl.appendChild(empty);
+  } else {
+    archive.forEach(function(entry) {
+      var item = document.createElement('div');
+      item.className = 'archive-item';
+
+      var dateDiv = document.createElement('div');
+      dateDiv.className = 'archive-item-date';
+      dateDiv.textContent = formatDate(entry.date);
+
+      var previewDiv = document.createElement('div');
+      previewDiv.className = 'archive-item-preview';
+      previewDiv.textContent = entry.message;
+
+      var catDiv = document.createElement('div');
+      catDiv.className = 'archive-item-category';
+      catDiv.textContent = entry.category || '';
+
+      item.appendChild(dateDiv);
+      item.appendChild(previewDiv);
+      if (entry.category) item.appendChild(catDiv);
+
+      item.addEventListener('click', function() { openDetail(entry); });
+      listEl.appendChild(item);
+    });
+  }
+
+  // animate items in
+  var items = listEl.querySelectorAll('.archive-item');
+  items.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(8px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, 120 + i * 60);
+  });
+
+  show('archive-screen');
+  document.getElementById('archive-back-btn').onclick = function() {
+    show(fromScreen || 'ritual-screen');
+    if ((fromScreen || 'ritual-screen') === 'ritual-screen') initRitual();
+  };
+}
+
+function openDetail(entry) {
+  var detail = document.getElementById('archive-detail');
+  document.getElementById('detail-date').textContent = formatDate(entry.date);
+  document.getElementById('detail-text').textContent = entry.message;
+  document.getElementById('detail-holy').textContent = entry.holyCode;
+  detail.classList.add('open');
+  document.getElementById('detail-close').onclick = function() {
+    detail.classList.remove('open');
+  };
 }
 
 // ── Boot ──
